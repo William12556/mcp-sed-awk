@@ -693,12 +693,19 @@ pip install dist/*.whl
     - GitHub version control maintains complete revision history
   - 1.10.3 Human Handoff
     - Claude Desktop: After human approval of T04 prompt, provides ready-to-execute command in conversation
-    - Command format: `claude --print < /path/to/workspace/prompt/prompt-NNNN-<name>.md`
-    - Claude Desktop: Command must specify complete absolute path to T04 prompt document
-    - Claude Desktop: No separate instruction document files are created
-    - Human: Copies command from conversation and executes in terminal
+    - Command format includes:
+      - Governance document location for context
+      - Design document locations for context
+      - Prompt document path for implementation
+    - Claude Desktop: Must specify complete absolute paths to all referenced documents
+    - Human: Starts Claude Code in project root directory
+    - Human: Pastes provided command into Claude Code
     - Human: Notifies Claude Desktop when Claude Code execution completes
-
+    - Example command structure:
+```
+  - For reference and context, governance is in '/path/to/project/ai/governance.md' and design documents are in '/path/to/project/workspace/design'
+  -  Implement prompt '/path/to/project/workspace/prompt/prompt-NNNN-<name>.md'.
+```
   - 1.10.4 Prompt Revision
     - Claude Desktop: Rewrites existing prompt documents when changes needed
     - Claude Desktop: Documents revision rationale in prompt version_history section
@@ -3590,6 +3597,7 @@ flowchart TD
 | 4.4     | 2025-12-03 | Added P00 1.1.14 Logging Standards: environment-based log level control, flat file format, rotation policy, test/production mode separation                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 4.5     | 2025-12-04 | Simplified human handoff mechanism: Replaced P00 1.1.8 and P00 1.1.9 instruction document creation with conversational command delivery; replaced P09 1.10.3 Instruction Documents with Human Handoff providing ready-to-execute commands directly in conversation; removed P09 1.10.5 Instruction Document Creation (now covered by 1.10.3); eliminates redundant prompt-NNNN-instructions.md files while maintaining domain separation                                                                                                                                  |
 | 4.6     | 2025-12-04 | Added P00 1.1.15 Knowledge Base: Both domains must consult workspace/knowledge/ when creating documents or code; established institutional knowledge capture; added knowledge/ to P01 1.2.6 folder structure; enhanced T04 Prompt context with knowledge_references field                                                                                                                                                                                                                                                                                                 |
+| 4.7     | 2025-12-10 | Enhanced P09 1.10.3 Human Handoff: Replaced single command format with structured approach providing governance, design, and prompt locations to Claude Code; changed execution from terminal command to paste-into-Claude Code workflow |
 
 ---
 [Return to Table of Contents](<#table of contents>)
