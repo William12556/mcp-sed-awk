@@ -1,1 +1,1 @@
-# Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+"""Security domain package."""
