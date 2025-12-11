@@ -81,6 +81,10 @@ class SecurityValidator:
         ';', '|', '&', '$', '`', '\n', '\r', '\x00'
     })
     
+    AWK_METACHARACTERS = frozenset({
+        ';', '|', '&', '`', '\n', '\r', '\x00'
+    })
+    
     MAX_PATTERN_LENGTH = 1000
     MAX_PROGRAM_LENGTH = 2000
     MAX_NESTING_DEPTH = 5
@@ -105,8 +109,8 @@ class SecurityValidator:
         """
         try:
             self._check_length(pattern, self.MAX_PATTERN_LENGTH, "Pattern")
-            self._check_blacklist(pattern, self.SED_BLACKLIST, "sed command")
             self._check_metacharacters(pattern)
+            self._check_sed_pattern_structure(pattern)
             self._check_complexity(pattern)
             
         except ValidationError as e:
@@ -115,6 +119,71 @@ class SecurityValidator:
                 pattern[:100], str(e)
             )
             raise
+    
+    def _check_sed_pattern_structure(self, pattern: str) -> None:
+        """Check sed pattern structure for blacklisted flags.
+        
+        Parses s/pattern/replacement/flags structure and validates only
+        the flags section against the blacklist. This prevents false positives
+        where blacklisted characters appear in pattern or replacement text.
+        
+        Args:
+            pattern: Sed pattern to validate
+            
+        Raises:
+            ValidationError: If blacklisted flag found in flags section
+        """
+        pattern = pattern.strip()
+        
+        # Handle s/pattern/replacement/flags substitution commands
+        if pattern.startswith('s/'):
+            # Parse manually to handle escaped delimiters correctly
+            parts = []
+            current_part = ""
+            i = 2  # Start after 's/'
+            
+            while i < len(pattern):
+                if pattern[i] == '\\' and i + 1 < len(pattern):
+                    # Escaped character - add both backslash and next char
+                    current_part += pattern[i:i+2]
+                    i += 2
+                elif pattern[i] == '/':
+                    # Unescaped delimiter
+                    parts.append(current_part)
+                    current_part = ""
+                    i += 1
+                    if len(parts) == 2:  # Found pattern and replacement
+                        # Rest is flags
+                        flags = pattern[i:]
+                        break
+                else:
+                    current_part += pattern[i]
+                    i += 1
+            else:
+                # No flags section found
+                flags = ""
+            
+            # Check flags for blacklisted commands
+            if flags:
+                for flag_char in flags:
+                    if flag_char in self.SED_BLACKLIST:
+                        raise ValidationError(
+                            f"Forbidden sed command detected: '{flag_char}'",
+                            "BLACKLIST_VIOLATION",
+                            {"forbidden_item": flag_char}
+                        )
+        
+        # For non-substitution patterns, check for other sed commands
+        # This handles patterns like 'w filename', 'r filename', etc.
+        else:
+            # Check for commands at the start of the pattern
+            for cmd in self.SED_BLACKLIST:
+                if pattern.startswith(cmd):
+                    raise ValidationError(
+                        f"Forbidden sed command detected: '{cmd}'",
+                        "BLACKLIST_VIOLATION", 
+                        {"forbidden_item": cmd}
+                    )
     
     def validate_sed_program(self, program: str) -> None:
         """Validate multi-line sed program.
@@ -136,7 +205,7 @@ class SecurityValidator:
                 line = line.strip()
                 if line:  # Skip empty lines
                     try:
-                        self._check_blacklist(line, self.SED_BLACKLIST, "sed command")
+                        self._check_sed_pattern_structure(line)
                         self._check_metacharacters(line)
                     except ValidationError as e:
                         raise ValidationError(
@@ -167,7 +236,7 @@ class SecurityValidator:
         try:
             self._check_length(program, self.MAX_PROGRAM_LENGTH, "Program")
             self._check_blacklist(program, self.AWK_BLACKLIST, "AWK function")
-            self._check_metacharacters(program)
+            self._check_metacharacters(program, self.AWK_METACHARACTERS)
             
         except ValidationError as e:
             logger.debug(
@@ -220,16 +289,20 @@ class SecurityValidator:
                     {"forbidden_item": item}
                 )
     
-    def _check_metacharacters(self, text: str) -> None:
+    def _check_metacharacters(self, text: str, metacharacters: frozenset = None) -> None:
         """Check for shell metacharacters.
         
         Args:
             text: Text to validate
+            metacharacters: Set of forbidden metacharacters (defaults to SHELL_METACHARACTERS)
             
         Raises:
             ValidationError: If metacharacter found
         """
-        for char in self.SHELL_METACHARACTERS:
+        if metacharacters is None:
+            metacharacters = self.SHELL_METACHARACTERS
+            
+        for char in metacharacters:
             if char in text:
                 char_repr = repr(char) if char in '\n\r\x00' else char
                 raise ValidationError(

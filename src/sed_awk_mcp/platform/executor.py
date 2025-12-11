@@ -11,6 +11,8 @@ import time
 from dataclasses import dataclass
 from typing import List, Optional
 
+from .config import PlatformConfig
+
 # Import resource module only if available (Linux/Unix)
 try:
     import resource
@@ -32,11 +34,13 @@ class ExecutionResult:
         stderr: Standard error as string
         returncode: Process exit code
         duration: Execution time in seconds
+        timed_out: Whether execution exceeded timeout
     """
     stdout: str
     stderr: str
     returncode: int
     duration: float
+    timed_out: bool = False
     
     @property
     def success(self) -> bool:
@@ -106,11 +110,15 @@ class BinaryExecutor:
     MEMORY_LIMIT_MB = 100
     CPU_TIME_LIMIT = 30
     
-    def __init__(self) -> None:
+    def __init__(self, config: PlatformConfig) -> None:
         """Initialize BinaryExecutor.
         
+        Args:
+            config: Platform configuration containing binary paths
+            
         Checks platform capabilities for resource limiting.
         """
+        self.config = config
         self._has_resource_limits = HAS_RESOURCE and sys.platform.startswith('linux')
         
         logger.debug(
@@ -120,7 +128,6 @@ class BinaryExecutor:
     
     def execute(
         self,
-        binary_path: str,
         args: List[str],
         timeout: int = DEFAULT_TIMEOUT,
         apply_limits: bool = True
@@ -132,8 +139,7 @@ class BinaryExecutor:
         on supported platforms.
         
         Args:
-            binary_path: Full path to the binary to execute
-            args: Argument list (will be passed as separate arguments)
+            args: Command and argument list (first element is binary name)
             timeout: Execution timeout in seconds (default: 30)
             apply_limits: Whether to apply resource limits (default: True)
             
@@ -144,8 +150,23 @@ class BinaryExecutor:
             TimeoutError: If execution exceeds timeout
             ExecutionError: If execution fails unexpectedly
         """
-        # Build command array - binary path + arguments
-        cmd = [binary_path] + args
+        if not args:
+            raise ExecutionError("Empty command arguments")
+        
+        # Get binary name and resolve to full path
+        binary_name = args[0]
+        if binary_name == 'sed':
+            binary_path = self.config.sed_path
+        elif binary_name == 'awk':
+            binary_path = self.config.awk_path
+        elif binary_name == 'diff':
+            binary_path = self.config.diff_path
+        else:
+            # For other commands (like 'echo', 'sleep'), use as-is
+            binary_path = binary_name
+        
+        # Build command array - binary path + arguments (excluding first arg)
+        cmd = [binary_path] + args[1:]
         
         # Prepare subprocess kwargs
         kwargs = {
@@ -163,7 +184,7 @@ class BinaryExecutor:
         # Log execution attempt
         logger.debug(
             "BinaryExecutor executing: binary=%s args=%s timeout=%s",
-            binary_path, args, timeout
+            binary_path, args[1:], timeout
         )
         
         # Execute subprocess with timing
@@ -176,7 +197,8 @@ class BinaryExecutor:
                 stdout=result.stdout,
                 stderr=result.stderr,
                 returncode=result.returncode,
-                duration=duration
+                duration=duration,
+                timed_out=False
             )
             
             logger.debug(
@@ -194,10 +216,13 @@ class BinaryExecutor:
                 binary_path, timeout, duration
             )
             
-            raise TimeoutError(
-                f"Execution exceeded {timeout}s timeout",
-                timeout=timeout
-            ) from e
+            return ExecutionResult(
+                stdout=e.stdout or "",
+                stderr=e.stderr or "",
+                returncode=-1,
+                duration=duration,
+                timed_out=True
+            )
             
         except (OSError, subprocess.SubprocessError) as e:
             duration = time.time() - start_time

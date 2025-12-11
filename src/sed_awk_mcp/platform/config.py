@@ -95,14 +95,8 @@ class PlatformConfig:
                     # BSD sed: -i followed by separate backup extension
                     normalized.append('-i')
                     if len(arg) == 2:  # Just "-i"
-                        # Next argument should be backup extension, or use default
-                        if i + 1 < len(args) and not args[i + 1].startswith('-'):
-                            # Next arg is backup extension
-                            normalized.append(args[i + 1])
-                            i += 1  # Skip the backup extension argument
-                        else:
-                            # No backup extension provided, use default
-                            normalized.append('.bak')
+                        # For BSD sed, always provide default backup extension
+                        normalized.append('.bak')
                     else:  # -iext
                         # Extract extension from -iext
                         normalized.append(arg[2:])

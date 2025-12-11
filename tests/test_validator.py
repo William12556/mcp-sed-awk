@@ -21,7 +21,7 @@ class TestSecurityValidator:
     def test_pattern_length_limit(self):
         """TC-003: Pattern exceeding 1000 chars rejected."""
         validator = SecurityValidator()
-        long_pattern = 's/' + 'a' * 995 + '/b/'
+        long_pattern = 's/' + 'a' * 996 + '/b/'  # 1001 chars total
         with pytest.raises(ValidationError, match="exceeds maximum length"):
             validator.validate_sed_pattern(long_pattern)
     
