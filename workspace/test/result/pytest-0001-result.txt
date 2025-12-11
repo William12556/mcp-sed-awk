@@ -1,0 +1,478 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /Users/williamwatson/Documents/GitHub/mcp-sed-awk/venv/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /Users/williamwatson/Documents/GitHub/mcp-sed-awk
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.12.0, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 40 items
+
+tests/test_audit.py::TestAuditLogger::test_validation_failure_logs_warning PASSED [  2%]
+tests/test_audit.py::TestAuditLogger::test_string_truncation PASSED      [  5%]
+tests/test_audit.py::TestAuditLogger::test_logging_never_raises PASSED   [  7%]
+tests/test_audit.py::TestAuditLogger::test_nested_sanitization PASSED    [ 10%]
+tests/test_audit.py::TestAuditLogger::test_access_violation_logs_warning PASSED [ 12%]
+tests/test_audit.py::TestAuditLogger::test_execution_success_logs_info PASSED [ 15%]
+tests/test_audit.py::TestAuditLogger::test_execution_failure_logs_error PASSED [ 17%]
+tests/test_path_validator.py::TestPathValidator::test_valid_path_in_allowed_directory PASSED [ 20%]
+tests/test_path_validator.py::TestPathValidator::test_path_traversal_blocked PASSED [ 22%]
+tests/test_path_validator.py::TestPathValidator::test_symlink_to_forbidden_location PASSED [ 25%]
+tests/test_path_validator.py::TestPathValidator::test_empty_whitelist_raises_error PASSED [ 27%]
+tests/test_path_validator.py::TestPathValidator::test_invalid_directory_raises_error PASSED [ 30%]
+tests/test_path_validator.py::TestPathValidator::test_file_as_allowed_dir_raises_error PASSED [ 32%]
+tests/test_path_validator.py::TestPathValidator::test_relative_path_resolution PASSED [ 35%]
+tests/test_path_validator.py::TestPathValidator::test_list_allowed_returns_sorted PASSED [ 37%]
+tests/test_path_validator.py::TestPathValidator::test_subdirectory_access_allowed PASSED [ 40%]
+tests/test_platform.py::TestPlatformConfig::test_binaries_located PASSED [ 42%]
+tests/test_platform.py::TestPlatformConfig::test_gnu_detection PASSED    [ 45%]
+tests/test_platform.py::TestPlatformConfig::test_sed_normalization_gnu PASSED [ 47%]
+tests/test_platform.py::TestPlatformConfig::test_sed_normalization_bsd FAILED [ 50%]
+tests/test_platform.py::TestPlatformConfig::test_missing_binary_raises_error PASSED [ 52%]
+tests/test_platform.py::TestBinaryExecutor::test_execute_with_shell_false FAILED [ 55%]
+tests/test_platform.py::TestBinaryExecutor::test_timeout_enforced FAILED [ 57%]
+tests/test_platform.py::TestBinaryExecutor::test_execution_result_dataclass FAILED [ 60%]
+tests/test_validator.py::TestSecurityValidator::test_valid_sed_pattern FAILED [ 62%]
+tests/test_validator.py::TestSecurityValidator::test_sed_blacklist_e_command PASSED [ 65%]
+tests/test_validator.py::TestSecurityValidator::test_pattern_length_limit FAILED [ 67%]
+tests/test_validator.py::TestSecurityValidator::test_nested_quantifiers_redos PASSED [ 70%]
+tests/test_validator.py::TestSecurityValidator::test_excessive_repetition PASSED [ 72%]
+tests/test_validator.py::TestSecurityValidator::test_semicolon_metacharacter FAILED [ 75%]
+tests/test_validator.py::TestSecurityValidator::test_awk_system_function PASSED [ 77%]
+tests/test_validator.py::TestSecurityValidator::test_valid_awk_program FAILED [ 80%]
+tests/test_validator.py::TestSecurityValidator::test_multiline_sed_with_w_command PASSED [ 82%]
+tests/test_validator.py::TestSecurityValidator::test_deep_nesting_limit PASSED [ 85%]
+tests/test_validator.py::TestSecurityValidator::test_all_sed_blacklist_commands PASSED [ 87%]
+tests/test_validator.py::TestSecurityValidator::test_all_awk_blacklist_functions PASSED [ 90%]
+tests/test_validator.py::TestSecurityValidator::test_all_shell_metacharacters FAILED [ 92%]
+tests/test_validator.py::TestSecurityValidator::test_pattern_at_max_length FAILED [ 95%]
+tests/test_validator.py::TestSecurityValidator::test_empty_pattern PASSED [ 97%]
+tests/test_validator.py::TestSecurityValidator::test_validation_error_attributes PASSED [100%]
+
+=================================== FAILURES ===================================
+________________ TestPlatformConfig.test_sed_normalization_bsd _________________
+
+self = <tests.test_platform.TestPlatformConfig object at 0x1095a7c50>
+
+    def test_sed_normalization_bsd(self):
+        """TC-021: Sed -i normalization for BSD."""
+        config = PlatformConfig()
+        config.is_gnu_sed = False
+    
+        args = ['-i', 's/a/b/', 'file.txt']
+        normalized = config.normalize_sed_args(args)
+>       assert normalized == ['-i', '.bak', 's/a/b/', 'file.txt']
+E       AssertionError: assert ['-i', 's/a/b/', 'file.txt'] == ['-i', '.bak'...', 'file.txt']
+E         
+E         At index 1 diff: 's/a/b/' != '.bak'
+E         Right contains one more item: 'file.txt'
+E         
+E         Full diff:
+E           [
+E               '-i',...
+E         
+E         ...Full output truncated (4 lines hidden), use '-vv' to show
+
+tests/test_platform.py:40: AssertionError
+_______________ TestBinaryExecutor.test_execute_with_shell_false _______________
+
+self = <tests.test_platform.TestBinaryExecutor object at 0x1095a6d10>
+
+    def test_execute_with_shell_false(self):
+        """TC-023: Subprocess executes with shell=False."""
+        config = PlatformConfig()
+>       executor = BinaryExecutor(config)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: BinaryExecutor.__init__() takes 1 positional argument but 2 were given
+
+tests/test_platform.py:55: TypeError
+___________________ TestBinaryExecutor.test_timeout_enforced ___________________
+
+self = <tests.test_platform.TestBinaryExecutor object at 0x10956b250>
+
+    def test_timeout_enforced(self):
+        """TC-024: 30s timeout enforced."""
+        config = PlatformConfig()
+>       executor = BinaryExecutor(config)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: BinaryExecutor.__init__() takes 1 positional argument but 2 were given
+
+tests/test_platform.py:64: TypeError
+______________ TestBinaryExecutor.test_execution_result_dataclass ______________
+
+self = <tests.test_platform.TestBinaryExecutor object at 0x1095bc690>
+
+    def test_execution_result_dataclass(self):
+        """ExecutionResult has expected fields."""
+        config = PlatformConfig()
+>       executor = BinaryExecutor(config)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: BinaryExecutor.__init__() takes 1 positional argument but 2 were given
+
+tests/test_platform.py:73: TypeError
+_________________ TestSecurityValidator.test_valid_sed_pattern _________________
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bd5d0>
+
+    def test_valid_sed_pattern(self):
+        """TC-001: Valid sed pattern passes validation."""
+        validator = SecurityValidator()
+>       validator.validate_sed_pattern('s/old/new/g')  # Should not raise
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_validator.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/sed_awk_mcp/security/validator.py:108: in validate_sed_pattern
+    self._check_blacklist(pattern, self.SED_BLACKLIST, "sed command")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sed_awk_mcp.security.validator.SecurityValidator object at 0x1095ef950>
+text = 's/old/new/g', blacklist = frozenset({':', 'Q', 'R', 'T', 'W', 'b', ...})
+label = 'sed command'
+
+    def _check_blacklist(
+        self,
+        text: str,
+        blacklist: frozenset,
+        label: str
+    ) -> None:
+        """Check for blacklisted commands/functions.
+    
+        Uses frozenset for O(1) lookup performance.
+    
+        Args:
+            text: Text to validate
+            blacklist: Set of forbidden items
+            label: Label for error messages
+    
+        Raises:
+            ValidationError: If blacklisted item found
+        """
+        for item in blacklist:
+            if item in text:
+>               raise ValidationError(
+                    f"Forbidden {label} detected: '{item}'",
+                    "BLACKLIST_VIOLATION",
+                    {"forbidden_item": item}
+                )
+E               sed_awk_mcp.security.validator.ValidationError: Forbidden sed command detected: 'e'
+
+src/sed_awk_mcp/security/validator.py:217: ValidationError
+_______________ TestSecurityValidator.test_pattern_length_limit ________________
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bdc50>
+
+    def test_pattern_length_limit(self):
+        """TC-003: Pattern exceeding 1000 chars rejected."""
+        validator = SecurityValidator()
+        long_pattern = 's/' + 'a' * 995 + '/b/'
+        with pytest.raises(ValidationError, match="exceeds maximum length"):
+>           validator.validate_sed_pattern(long_pattern)
+
+tests/test_validator.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/sed_awk_mcp/security/validator.py:108: in validate_sed_pattern
+    self._check_blacklist(pattern, self.SED_BLACKLIST, "sed command")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sed_awk_mcp.security.validator.SecurityValidator object at 0x1095d5e10>
+text = 's/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/b/'
+blacklist = frozenset({':', 'Q', 'R', 'T', 'W', 'b', ...})
+label = 'sed command'
+
+    def _check_blacklist(
+        self,
+        text: str,
+        blacklist: frozenset,
+        label: str
+    ) -> None:
+        """Check for blacklisted commands/functions.
+    
+        Uses frozenset for O(1) lookup performance.
+    
+        Args:
+            text: Text to validate
+            blacklist: Set of forbidden items
+            label: Label for error messages
+    
+        Raises:
+            ValidationError: If blacklisted item found
+        """
+        for item in blacklist:
+            if item in text:
+>               raise ValidationError(
+                    f"Forbidden {label} detected: '{item}'",
+                    "BLACKLIST_VIOLATION",
+                    {"forbidden_item": item}
+                )
+E               sed_awk_mcp.security.validator.ValidationError: Forbidden sed command detected: 'b'
+
+src/sed_awk_mcp/security/validator.py:217: ValidationError
+
+During handling of the above exception, another exception occurred:
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bdc50>
+
+    def test_pattern_length_limit(self):
+        """TC-003: Pattern exceeding 1000 chars rejected."""
+        validator = SecurityValidator()
+        long_pattern = 's/' + 'a' * 995 + '/b/'
+>       with pytest.raises(ValidationError, match="exceeds maximum length"):
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'exceeds maximum length'
+E         Actual message: "Forbidden sed command detected: 'b'"
+
+tests/test_validator.py:25: AssertionError
+______________ TestSecurityValidator.test_semicolon_metacharacter ______________
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bee90>
+
+    def test_semicolon_metacharacter(self):
+        """TC-006: Pattern with semicolon metacharacter rejected."""
+        validator = SecurityValidator()
+        with pytest.raises(ValidationError, match="metacharacter"):
+>           validator.validate_sed_pattern('s/a/b/; rm -rf /')
+
+tests/test_validator.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/sed_awk_mcp/security/validator.py:108: in validate_sed_pattern
+    self._check_blacklist(pattern, self.SED_BLACKLIST, "sed command")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sed_awk_mcp.security.validator.SecurityValidator object at 0x10965c250>
+text = 's/a/b/; rm -rf /'
+blacklist = frozenset({':', 'Q', 'R', 'T', 'W', 'b', ...})
+label = 'sed command'
+
+    def _check_blacklist(
+        self,
+        text: str,
+        blacklist: frozenset,
+        label: str
+    ) -> None:
+        """Check for blacklisted commands/functions.
+    
+        Uses frozenset for O(1) lookup performance.
+    
+        Args:
+            text: Text to validate
+            blacklist: Set of forbidden items
+            label: Label for error messages
+    
+        Raises:
+            ValidationError: If blacklisted item found
+        """
+        for item in blacklist:
+            if item in text:
+>               raise ValidationError(
+                    f"Forbidden {label} detected: '{item}'",
+                    "BLACKLIST_VIOLATION",
+                    {"forbidden_item": item}
+                )
+E               sed_awk_mcp.security.validator.ValidationError: Forbidden sed command detected: 'b'
+
+src/sed_awk_mcp/security/validator.py:217: ValidationError
+
+During handling of the above exception, another exception occurred:
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bee90>
+
+    def test_semicolon_metacharacter(self):
+        """TC-006: Pattern with semicolon metacharacter rejected."""
+        validator = SecurityValidator()
+>       with pytest.raises(ValidationError, match="metacharacter"):
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'metacharacter'
+E         Actual message: "Forbidden sed command detected: 'b'"
+
+tests/test_validator.py:43: AssertionError
+_________________ TestSecurityValidator.test_valid_awk_program _________________
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bfb10>
+
+    def test_valid_awk_program(self):
+        """TC-008: Valid AWK program passes validation."""
+        validator = SecurityValidator()
+>       validator.validate_awk_program('{print $1}')  # Should not raise
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_validator.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/sed_awk_mcp/security/validator.py:170: in validate_awk_program
+    self._check_metacharacters(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sed_awk_mcp.security.validator.SecurityValidator object at 0x10956add0>
+text = '{print $1}'
+
+    def _check_metacharacters(self, text: str) -> None:
+        """Check for shell metacharacters.
+    
+        Args:
+            text: Text to validate
+    
+        Raises:
+            ValidationError: If metacharacter found
+        """
+        for char in self.SHELL_METACHARACTERS:
+            if char in text:
+                char_repr = repr(char) if char in '\n\r\x00' else char
+>               raise ValidationError(
+                    f"Pattern contains forbidden shell metacharacter: {char_repr}",
+                    "METACHARACTER_VIOLATION",
+                    {"metacharacter": char}
+                )
+E               sed_awk_mcp.security.validator.ValidationError: Pattern contains forbidden shell metacharacter: $
+
+src/sed_awk_mcp/security/validator.py:235: ValidationError
+_____________ TestSecurityValidator.test_all_shell_metacharacters ______________
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095d5a50>
+
+    def test_all_shell_metacharacters(self):
+        """Verify all SHELL_METACHARACTERS are rejected."""
+        validator = SecurityValidator()
+        metacharacters = [';', '|', '&', '$', '`', '\n', '\r', '\x00']
+    
+        for char in metacharacters:
+            with pytest.raises(ValidationError, match="metacharacter"):
+>               validator.validate_sed_pattern(f's/a/b/{char}')
+
+tests/test_validator.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/sed_awk_mcp/security/validator.py:108: in validate_sed_pattern
+    self._check_blacklist(pattern, self.SED_BLACKLIST, "sed command")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sed_awk_mcp.security.validator.SecurityValidator object at 0x1095a40d0>
+text = 's/a/b/;', blacklist = frozenset({':', 'Q', 'R', 'T', 'W', 'b', ...})
+label = 'sed command'
+
+    def _check_blacklist(
+        self,
+        text: str,
+        blacklist: frozenset,
+        label: str
+    ) -> None:
+        """Check for blacklisted commands/functions.
+    
+        Uses frozenset for O(1) lookup performance.
+    
+        Args:
+            text: Text to validate
+            blacklist: Set of forbidden items
+            label: Label for error messages
+    
+        Raises:
+            ValidationError: If blacklisted item found
+        """
+        for item in blacklist:
+            if item in text:
+>               raise ValidationError(
+                    f"Forbidden {label} detected: '{item}'",
+                    "BLACKLIST_VIOLATION",
+                    {"forbidden_item": item}
+                )
+E               sed_awk_mcp.security.validator.ValidationError: Forbidden sed command detected: 'b'
+
+src/sed_awk_mcp/security/validator.py:217: ValidationError
+
+During handling of the above exception, another exception occurred:
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095d5a50>
+
+    def test_all_shell_metacharacters(self):
+        """Verify all SHELL_METACHARACTERS are rejected."""
+        validator = SecurityValidator()
+        metacharacters = [';', '|', '&', '$', '`', '\n', '\r', '\x00']
+    
+        for char in metacharacters:
+>           with pytest.raises(ValidationError, match="metacharacter"):
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'metacharacter'
+E             Actual message: "Forbidden sed command detected: 'b'"
+
+tests/test_validator.py:95: AssertionError
+_______________ TestSecurityValidator.test_pattern_at_max_length _______________
+
+self = <tests.test_validator.TestSecurityValidator object at 0x1095bf890>
+
+    def test_pattern_at_max_length(self):
+        """Pattern at exactly 1000 chars should pass."""
+        validator = SecurityValidator()
+        pattern = 's/' + 'a' * 994 + '/b/'  # Exactly 1000 chars
+>       validator.validate_sed_pattern(pattern)  # Should not raise
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_validator.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/sed_awk_mcp/security/validator.py:108: in validate_sed_pattern
+    self._check_blacklist(pattern, self.SED_BLACKLIST, "sed command")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sed_awk_mcp.security.validator.SecurityValidator object at 0x1096c9410>
+text = 's/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/b/'
+blacklist = frozenset({':', 'Q', 'R', 'T', 'W', 'b', ...})
+label = 'sed command'
+
+    def _check_blacklist(
+        self,
+        text: str,
+        blacklist: frozenset,
+        label: str
+    ) -> None:
+        """Check for blacklisted commands/functions.
+    
+        Uses frozenset for O(1) lookup performance.
+    
+        Args:
+            text: Text to validate
+            blacklist: Set of forbidden items
+            label: Label for error messages
+    
+        Raises:
+            ValidationError: If blacklisted item found
+        """
+        for item in blacklist:
+            if item in text:
+>               raise ValidationError(
+                    f"Forbidden {label} detected: '{item}'",
+                    "BLACKLIST_VIOLATION",
+                    {"forbidden_item": item}
+                )
+E               sed_awk_mcp.security.validator.ValidationError: Forbidden sed command detected: 'b'
+
+src/sed_awk_mcp/security/validator.py:217: ValidationError
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.11.14-final-0 _______________
+
+Name                                         Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------
+src/sed_awk_mcp/__init__.py                      5      0   100%
+src/sed_awk_mcp/__main__.py                      3      3     0%   8-11
+src/sed_awk_mcp/platform/__init__.py             0      0   100%
+src/sed_awk_mcp/platform/config.py              60      9    85%   93, 105-108, 134, 150, 159, 213-219
+src/sed_awk_mcp/platform/executor.py            71     42    41%   18-19, 48, 66-68, 86-88, 114-116, 148-223, 241-259
+src/sed_awk_mcp/security/__init__.py             0      0   100%
+src/sed_awk_mcp/security/audit.py               83     33    60%   38-41, 77-80, 107, 116-119, 154, 168-171, 188, 197, 208-211, 216, 219-221, 231-233, 242-249, 259-267
+src/sed_awk_mcp/security/path_validator.py      50      4    92%   92-97, 164
+src/sed_awk_mcp/security/validator.py           89      2    98%   140, 191
+src/sed_awk_mcp/server.py                      105     82    22%   54-85, 101-156, 169-178, 187-263, 267
+src/sed_awk_mcp/tools/__init__.py                0      0   100%
+src/sed_awk_mcp/tools/awk_tool.py               82     60    27%   62-68, 103-265
+src/sed_awk_mcp/tools/diff_tool.py              78     59    24%   57-62, 95-276
+src/sed_awk_mcp/tools/list_tool.py              35     23    34%   40-43, 61-125
+src/sed_awk_mcp/tools/sed_tool.py              134    108    19%   64-70, 106-234, 265-385
+--------------------------------------------------------------------------
+TOTAL                                          795    425    47%
+=========================== short test summary info ============================
+FAILED tests/test_platform.py::TestPlatformConfig::test_sed_normalization_bsd
+FAILED tests/test_platform.py::TestBinaryExecutor::test_execute_with_shell_false
+FAILED tests/test_platform.py::TestBinaryExecutor::test_timeout_enforced - Ty...
+FAILED tests/test_platform.py::TestBinaryExecutor::test_execution_result_dataclass
+FAILED tests/test_validator.py::TestSecurityValidator::test_valid_sed_pattern
+FAILED tests/test_validator.py::TestSecurityValidator::test_pattern_length_limit
+FAILED tests/test_validator.py::TestSecurityValidator::test_semicolon_metacharacter
+FAILED tests/test_validator.py::TestSecurityValidator::test_valid_awk_program
+FAILED tests/test_validator.py::TestSecurityValidator::test_all_shell_metacharacters
+FAILED tests/test_validator.py::TestSecurityValidator::test_pattern_at_max_length
+======================== 10 failed, 30 passed in 0.62s =========================
