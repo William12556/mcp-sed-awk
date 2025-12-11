@@ -1,11 +1,12 @@
 [project]
 name = "mcp-sed-awk"
 version = "0.1.0"
-description = "MCP server providing sed and awk text processing capabilities"
+description = "MCP server providing sed, awk, and diff text processing capabilities"
 authors = [{name = "William Watson"}]
 license = {text = "MIT"}
 requires-python = ">=3.9"
 dependencies = [
+    "fastmcp>=0.1.0",
 ]
 
 [project.optional-dependencies]
@@ -13,21 +14,28 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
+    "pytest-mock>=3.12.0",
 ]
 
+[project.scripts]
+mcp-sed-awk = "sed_awk_mcp.server:main"
+
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
+testpaths = ["src/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 
 [tool.coverage.run]
-source = ["src"]
+source = ["src/sed_awk_mcp"]
 omit = ["*/tests/*"]
 
 [tool.coverage.report]
