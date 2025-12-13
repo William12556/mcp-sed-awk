@@ -157,8 +157,7 @@ async def sed_substitute(
             
             # Step 7: Execute sed command
             result = binary_executor.execute(
-                platform_config.sed_path,
-                normalized_args,
+                ['sed'] + normalized_args,
                 timeout=30
             )
             
@@ -301,10 +300,9 @@ async def preview_sed(
             
             args = ['-i', sed_pattern, str(tmp_path)]
             normalized_args = platform_config.normalize_sed_args(args)
-            
+
             result = binary_executor.execute(
-                platform_config.sed_path,
-                normalized_args,
+                ['sed'] + normalized_args,
                 timeout=30
             )
             
@@ -316,8 +314,7 @@ async def preview_sed(
             # Step 6: Generate unified diff
             diff_args = ['-u', str(validated_path), str(tmp_path)]
             diff_result = binary_executor.execute(
-                platform_config.diff_path,
-                diff_args,
+                ['diff'] + diff_args,
                 timeout=10
             )
             

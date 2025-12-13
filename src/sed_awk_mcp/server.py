@@ -113,7 +113,7 @@ def initialize_components(allowed_dirs: List[str]) -> None:
         
         # Initialize execution component
         logger.debug("Initializing binary executor...")
-        binary_executor = BinaryExecutor()
+        binary_executor = BinaryExecutor(platform_config)
         
         # Inject components into tool modules
         logger.debug("Injecting components into tool modules...")

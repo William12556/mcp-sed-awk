@@ -158,8 +158,7 @@ async def awk_transform(
         
         # Step 7: Execute AWK command
         result = binary_executor.execute(
-            platform_config.awk_path,
-            normalized_args,
+            ['awk'] + normalized_args,
             timeout=60  # AWK might take longer for complex processing
         )
         

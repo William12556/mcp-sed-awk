@@ -166,8 +166,7 @@ async def diff_files(
         
         # Step 6: Execute diff command
         result = binary_executor.execute(
-            platform_config.diff_path,
-            normalized_args,
+            ['diff'] + normalized_args,
             timeout=30
         )
         
