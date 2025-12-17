@@ -158,7 +158,7 @@ test_environment:
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
-| 1 | Start server: `python -m sed_awk_mcp.server /tmp/test` | Server starts without errors, logs initialization |
+| 1 | Start server: `python -m sed_awk_mcp.server /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test` | Server starts without errors, logs initialization |
 | 2 | Verify component initialization | Log shows: SecurityValidator, PathValidator, BinaryExecutor, AuditLogger initialized |
 | 3 | Verify binary detection | Log shows sed/awk/diff paths detected |
 | 4 | Check platform detection | Log shows "GNU sed detected" or "BSD sed detected" |
@@ -179,17 +179,17 @@ test_environment:
 **Description:** Complete sed substitution workflow via MCP client
 
 **Preconditions:**
-- Server running with `/tmp/test` as allowed directory
-- Test file created: `/tmp/test/sample.txt` containing "hello world"
+- Server running with `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test` as allowed directory
+- Test file created: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt` containing "hello world"
 
 **Test Steps:**
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
-| 1 | Via MCP client, call sed_substitute("/tmp/test/sample.txt", "s/world/universe/", "universe") | Operation succeeds |
-| 2 | Check response message | "Successfully applied sed substitution to /tmp/test/sample.txt, backup created at sample.txt.bak" |
+| 1 | Via MCP client, call sed_substitute("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt", "s/world/universe/", "universe") | Operation succeeds |
+| 2 | Check response message | "Successfully applied sed substitution to /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt, backup created at sample.txt.bak" |
 | 3 | Verify file content | File contains "hello universe" |
-| 4 | Verify backup exists | `/tmp/test/sample.txt.bak` contains "hello world" |
+| 4 | Verify backup exists | `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt.bak` contains "hello world" |
 | 5 | Check audit log | Log entry shows successful sed operation |
 
 **Expected Outputs:**
@@ -208,7 +208,7 @@ test_environment:
 **Description:** Verify path traversal attempts are blocked
 
 **Preconditions:**
-- Server running with `/tmp/test` as allowed directory
+- Server running with `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test` as allowed directory
 
 **Test Steps:**
 
@@ -235,18 +235,18 @@ test_environment:
 **Description:** Verify command injection attempts are blocked
 
 **Preconditions:**
-- Server running with `/tmp/test` as allowed directory
-- Test file: `/tmp/test/sample.txt`
+- Server running with `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test` as allowed directory
+- Test file: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt`
 
 **Test Steps:**
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
-| 1 | Attempt sed with command injection: sed_substitute("/tmp/test/sample.txt", "s/test/$(rm -rf /)/", "replacement") | ValidationError raised |
+| 1 | Attempt sed with command injection: sed_substitute("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt", "s/test/$(rm -rf /)/", "replacement") | ValidationError raised |
 | 2 | Check error message | Error mentions forbidden pattern |
 | 3 | Verify file unchanged | File content unchanged |
-| 4 | Attempt sed read command: sed_substitute("/tmp/test/sample.txt", "r /etc/passwd", "") | ValidationError raised |
-| 5 | Attempt sed write command: sed_substitute("/tmp/test/sample.txt", "w /tmp/evil", "") | ValidationError raised |
+| 4 | Attempt sed read command: sed_substitute("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt", "r /etc/passwd", "") | ValidationError raised |
+| 5 | Attempt sed write command: sed_substitute("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt", "w /tmp/evil", "") | ValidationError raised |
 
 **Expected Outputs:**
 - ValidationError for all malicious patterns
@@ -264,7 +264,7 @@ test_environment:
 
 **Preconditions:**
 - Server running with test directory
-- Test file: `/tmp/test/compat.txt` containing "line1\nline2\nline3"
+- Test file: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/compat.txt` containing "line1\nline2\nline3"
 
 **Test Steps:**
 
@@ -292,13 +292,13 @@ test_environment:
 
 **Preconditions:**
 - Server running with test directory
-- CSV file: `/tmp/test/data.csv` containing "name,age,city\nAlice,30,NYC\nBob,25,LA"
+- CSV file: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/data.csv` containing "name,age,city\nAlice,30,NYC\nBob,25,LA"
 
 **Test Steps:**
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
-| 1 | Call awk_transform("/tmp/test/data.csv", "{print $2}", field_separator=",") | Operation succeeds |
+| 1 | Call awk_transform("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/data.csv", "{print $2}", field_separator=",") | Operation succeeds |
 | 2 | Check response | Contains "age\n30\n25" |
 | 3 | Verify original file unchanged | CSV file unchanged |
 | 4 | Check audit log | Log shows successful awk operation |
@@ -319,14 +319,14 @@ test_environment:
 
 **Preconditions:**
 - Server running with test directory
-- File1: `/tmp/test/old.txt` containing "version1\ndata"
-- File2: `/tmp/test/new.txt` containing "version2\ndata"
+- File1: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/old.txt` containing "version1\ndata"
+- File2: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/new.txt` containing "version2\ndata"
 
 **Test Steps:**
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
-| 1 | Call diff_files("/tmp/test/old.txt", "/tmp/test/new.txt") | Operation succeeds |
+| 1 | Call diff_files("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/old.txt", "/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/new.txt") | Operation succeeds |
 | 2 | Check response format | Contains unified diff markers (---, +++, @@) |
 | 3 | Verify diff shows changes | Shows version1 -> version2 change |
 | 4 | Verify files unchanged | Both files preserved |
@@ -347,13 +347,13 @@ test_environment:
 
 **Preconditions:**
 - Server running with test directory
-- Test file: `/tmp/test/preview.txt` containing "test data"
+- Test file: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/preview.txt` containing "test data"
 
 **Test Steps:**
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
-| 1 | Call preview_sed("/tmp/test/preview.txt", "s/test/TEST/", "TEST") | Operation succeeds |
+| 1 | Call preview_sed("/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/preview.txt", "s/test/TEST/", "TEST") | Operation succeeds |
 | 2 | Check response | Contains diff showing test -> TEST |
 | 3 | Verify original file unchanged | File still contains "test data" |
 | 4 | Verify no backup created | No .bak file exists |
@@ -373,7 +373,7 @@ test_environment:
 **Description:** Directory whitelist listing
 
 **Preconditions:**
-- Server running with `/tmp/test` as allowed directory
+- Server running with `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test` as allowed directory
 
 **Test Steps:**
 
@@ -398,7 +398,7 @@ test_environment:
 
 **Preconditions:**
 - Server running with test directory
-- Test file: `/tmp/test/rollback.txt` containing "original content"
+- Test file: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt` containing "original content"
 
 **Test Steps:**
 
@@ -425,7 +425,7 @@ test_environment:
 
 **Preconditions:**
 - Server running with test directory
-- Large file: `/tmp/test/large.txt` > 10MB
+- Large file: `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/large.txt` > 10MB
 
 **Test Steps:**
 

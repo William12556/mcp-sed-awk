@@ -51,46 +51,55 @@ pip list | grep sed-awk-mcp  # Should show installed package
 
 ### Step 1: Prepare Test Directory
 
-```bash
-# Create test directory
-mkdir -p /tmp/mcp-test
-cd /tmp/mcp-test
+**Note:** Test files are located within the project repository at:
+`/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test`
 
-# Verify directory is empty
+This directory is excluded from git via `.gitignore` and visible to Claude via Filesystem MCP tools.
+
+```bash
+# Navigate to test directory (already created)
+cd /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test
+
+# Verify directory contents
 ls -la
 
-# Set permissions
-chmod 755 /tmp/mcp-test
+# Set permissions if needed
+chmod 755 /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test
 ```
 
 ### Step 2: Create Test Files
 
+**Note:** Test files should already exist in the project test directory. If recreation needed:
+
 ```bash
+# Navigate to test directory
+cd /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test
+
 # Create sample text file
-echo "hello world" > /tmp/mcp-test/sample.txt
+echo "hello world" > sample.txt
 
 # Create CSV file for awk testing
-cat > /tmp/mcp-test/data.csv << 'EOF'
+cat > data.csv << 'EOF'
 name,age,city
 Alice,30,NYC
 Bob,25,LA
 EOF
 
 # Create files for diff testing
-echo -e "version1\ndata" > /tmp/mcp-test/old.txt
-echo -e "version2\ndata" > /tmp/mcp-test/new.txt
+echo -e "version1\ndata" > old.txt
+echo -e "version2\ndata" > new.txt
 
 # Create file for preview testing
-echo "test data" > /tmp/mcp-test/preview.txt
+echo "test data" > preview.txt
 
 # Create file for rollback testing
-echo "original content" > /tmp/mcp-test/rollback.txt
+echo "original content" > rollback.txt
 
 # Create large file for limit testing (>10MB)
-dd if=/dev/zero of=/tmp/mcp-test/large.txt bs=1048576 count=11
+dd if=/dev/zero of=large.txt bs=1048576 count=11
 
 # Verify all files created
-ls -lh /tmp/mcp-test/
+ls -lh
 ```
 
 Expected output:
@@ -129,7 +138,7 @@ Add this entry to the `mcpServers` section:
       "args": [
         "-m",
         "sed_awk_mcp.server",
-        "/tmp/mcp-test"
+        "/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test"
       ],
       "env": {}
     }
@@ -195,21 +204,21 @@ In Claude Desktop, look for:
 
 1. In Claude Desktop, type:
    ```
-   Use sed_substitute to replace "world" with "universe" in /tmp/mcp-test/sample.txt
+   Use sed_substitute to replace "world" with "universe" in /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt
    ```
 
 2. **Expected Response:**
-   - Success message: "Successfully applied sed substitution to /tmp/mcp-test/sample.txt, backup created at sample.txt.bak"
+   - Success message: "Successfully applied sed substitution to /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt, backup created at sample.txt.bak"
 
 3. **Verify File Modified:**
    ```bash
-   cat /tmp/mcp-test/sample.txt
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt
    ```
    Expected: `hello universe`
 
 4. **Verify Backup Created:**
    ```bash
-   cat /tmp/mcp-test/sample.txt.bak
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt.bak
    ```
    Expected: `hello world`
 
@@ -264,7 +273,7 @@ In Claude Desktop, look for:
 
 1. **Test Command Substitution Injection:**
    ```
-   Use sed_substitute to replace "test" with "$(rm -rf /)" in /tmp/mcp-test/rollback.txt
+   Use sed_substitute to replace "test" with "$(rm -rf /)" in /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
 
 2. **Expected Response:**
@@ -273,7 +282,7 @@ In Claude Desktop, look for:
 
 3. **Test Read Command Injection:**
    ```
-   Use sed with pattern "r /etc/passwd" on /tmp/mcp-test/rollback.txt
+   Use sed with pattern "r /etc/passwd" on /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
 
 4. **Expected Response:**
@@ -281,7 +290,7 @@ In Claude Desktop, look for:
 
 5. **Test Write Command Injection:**
    ```
-   Use sed with pattern "w /tmp/evil" on /tmp/mcp-test/rollback.txt
+   Use sed with pattern "w /tmp/evil" on /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
 
 6. **Expected Response:**
@@ -289,7 +298,7 @@ In Claude Desktop, look for:
 
 7. **Verify File Unchanged:**
    ```bash
-   cat /tmp/mcp-test/rollback.txt
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
    Expected: `original content`
 
@@ -314,12 +323,12 @@ In Claude Desktop, look for:
 
 2. **Test Basic Substitution:**
    ```
-   Use sed_substitute to replace "line1" with "LINE1" in /tmp/mcp-test/sample.txt
+   Use sed_substitute to replace "line1" with "LINE1" in /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt
    ```
 
 3. **Verify Operation:**
    ```bash
-   grep LINE1 /tmp/mcp-test/sample.txt
+   grep LINE1 /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/sample.txt
    ```
 
 4. **Test with Backup:**
@@ -329,7 +338,7 @@ In Claude Desktop, look for:
 
 5. **Verify Backup Format:**
    ```bash
-   ls /tmp/mcp-test/*.bak
+   ls /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/*.bak
    # Should show backup files regardless of sed variant
    ```
 
@@ -348,7 +357,7 @@ In Claude Desktop, look for:
 
 1. In Claude Desktop, type:
    ```
-   Use awk_transform to extract the age column (second field) from /tmp/mcp-test/data.csv using comma as separator
+   Use awk_transform to extract the age column (second field) from /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/data.csv using comma as separator
    ```
 
 2. **Expected Response:**
@@ -356,7 +365,7 @@ In Claude Desktop, look for:
 
 3. **Verify Original File Unchanged:**
    ```bash
-   cat /tmp/mcp-test/data.csv
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/data.csv
    ```
    Expected: Original CSV intact
 
@@ -375,7 +384,7 @@ In Claude Desktop, look for:
 
 1. In Claude Desktop, type:
    ```
-   Use diff_files to compare /tmp/mcp-test/old.txt and /tmp/mcp-test/new.txt
+   Use diff_files to compare /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/old.txt and /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/new.txt
    ```
 
 2. **Expected Response:**
@@ -386,7 +395,7 @@ In Claude Desktop, look for:
 
 3. **Verify Files Unchanged:**
    ```bash
-   cat /tmp/mcp-test/old.txt /tmp/mcp-test/new.txt
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/old.txt /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/new.txt
    ```
    Expected: Both files unchanged
 
@@ -405,7 +414,7 @@ In Claude Desktop, look for:
 
 1. In Claude Desktop, type:
    ```
-   Use preview_sed to show what would happen if I replace "test" with "TEST" in /tmp/mcp-test/preview.txt
+   Use preview_sed to show what would happen if I replace "test" with "TEST" in /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/preview.txt
    ```
 
 2. **Expected Response:**
@@ -413,13 +422,13 @@ In Claude Desktop, look for:
 
 3. **Verify File Unchanged:**
    ```bash
-   cat /tmp/mcp-test/preview.txt
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/preview.txt
    ```
    Expected: Still contains `test data` (lowercase)
 
 4. **Verify No Backup:**
    ```bash
-   ls /tmp/mcp-test/preview.txt.bak
+   ls /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/preview.txt.bak
    ```
    Expected: File does not exist
 
@@ -442,7 +451,7 @@ In Claude Desktop, look for:
    ```
 
 2. **Expected Response:**
-   - Shows `/tmp/mcp-test` (or its canonical path)
+   - Shows `/Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test` (or its canonical path)
    - Path is absolute and resolved
 
 **Pass Criteria:** ✅ Correct directory listed with canonical path
@@ -460,13 +469,13 @@ In Claude Desktop, look for:
 
 1. **Note Current File Content:**
    ```bash
-   cat /tmp/mcp-test/rollback.txt
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
    Expected: `original content`
 
 2. **Attempt Invalid Operation:**
    ```
-   Use sed_substitute with pattern "s/test/replacement/e" on /tmp/mcp-test/rollback.txt
+   Use sed_substitute with pattern "s/test/replacement/e" on /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
    Note: The 'e' flag is forbidden
 
@@ -475,13 +484,13 @@ In Claude Desktop, look for:
 
 4. **Verify File Unchanged:**
    ```bash
-   cat /tmp/mcp-test/rollback.txt
+   cat /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt
    ```
    Expected: Still `original content`
 
 5. **Verify No Backup:**
    ```bash
-   ls /tmp/mcp-test/rollback.txt.bak
+   ls /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/rollback.txt.bak
    ```
    Expected: No backup (operation failed before backup stage)
 
@@ -500,13 +509,13 @@ In Claude Desktop, look for:
 
 1. **Verify Large File Size:**
    ```bash
-   ls -lh /tmp/mcp-test/large.txt
+   ls -lh /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/large.txt
    ```
    Expected: Shows > 10M
 
 2. **Attempt Operation:**
    ```
-   Use sed_substitute to modify /tmp/mcp-test/large.txt
+   Use sed_substitute to modify /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/large.txt
    ```
 
 3. **Expected Response:**
@@ -515,7 +524,7 @@ In Claude Desktop, look for:
 
 4. **Verify File Unchanged:**
    ```bash
-   ls -lh /tmp/mcp-test/large.txt
+   ls -lh /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test/large.txt
    ```
    Expected: Same size (11M)
 
@@ -620,7 +629,7 @@ failures:
    ```
 3. Check directory exists:
    ```bash
-   ls -la /tmp/mcp-test
+   ls -la /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test
    ```
 4. View Claude Desktop logs:
    ```bash
@@ -643,11 +652,11 @@ failures:
 **Solutions:**
 1. Check test directory permissions:
    ```bash
-   chmod -R 755 /tmp/mcp-test
+   chmod -R 755 /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test
    ```
 2. Verify you own the files:
    ```bash
-   ls -la /tmp/mcp-test
+   ls -la /Users/williamwatson/Documents/GitHub/mcp-sed-awk/workspace/test/tmp/mcp-test
    ```
 
 ### Binary Not Found Errors
