@@ -1,6 +1,6 @@
 [project]
 name = "mcp-sed-awk"
-version = "0.1.0"
+version = "1.0.0"
 description = "MCP server providing sed, awk, and diff text processing capabilities"
 authors = [{name = "William Watson"}]
 license = {text = "MIT"}
