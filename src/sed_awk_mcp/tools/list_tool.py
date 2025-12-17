@@ -7,17 +7,13 @@ configured directory whitelist to MCP clients for transparency.
 import logging
 from typing import Optional
 
-import fastmcp
-
+from ..mcp_instance import mcp
 from ..security.path_validator import PathValidator
 from ..security.audit import AuditLogger
 
 # Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
 
 logger = logging.getLogger(__name__)
-
-# Initialize MCP server
-mcp = fastmcp.FastMCP("sed-awk-mcp")
 
 # Component references (will be initialized by main server)
 path_validator: Optional[PathValidator] = None

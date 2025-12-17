@@ -10,8 +10,7 @@ import os
 import sys
 from typing import List, Optional
 
-import fastmcp
-
+from .mcp_instance import mcp
 from .security.validator import SecurityValidator
 from .security.path_validator import PathValidator, SecurityError
 from .security.audit import AuditLogger
@@ -156,24 +155,22 @@ def initialize_components(allowed_dirs: List[str]) -> None:
         raise
 
 
-def create_server(allowed_dirs: List[str]) -> fastmcp.FastMCP:
+def create_server(allowed_dirs: List[str]):
     """Create and configure the FastMCP server instance.
-    
+
     Args:
         allowed_dirs: List of allowed directory paths
-        
+
     Returns:
         Configured FastMCP server instance
     """
     # Initialize all components
     initialize_components(allowed_dirs)
-    
-    # Create FastMCP server instance
-    mcp = fastmcp.FastMCP("sed-awk-mcp")
-    
+
     # Tools are automatically registered via @mcp.tool() decorators
-    # when the tool modules are imported
-    
+    # when the tool modules are imported. The shared mcp instance
+    # is imported from mcp_instance module.
+
     logger.info("FastMCP server created successfully")
     return mcp
 

@@ -10,8 +10,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-import fastmcp
-
+from ..mcp_instance import mcp
 from ..security.validator import SecurityValidator, ValidationError
 from ..security.path_validator import PathValidator, SecurityError
 from ..security.audit import AuditLogger
@@ -21,9 +20,6 @@ from ..platform.executor import BinaryExecutor, TimeoutError, ExecutionError
 # Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
 
 logger = logging.getLogger(__name__)
-
-# Initialize MCP server
-mcp = fastmcp.FastMCP("sed-awk-mcp")
 
 # Resource limits
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
