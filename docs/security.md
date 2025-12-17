@@ -665,4 +665,4 @@ chmod 600 ~/.config/sed-awk-mcp/allowed_dirs.txt
 
 ---
 
-Copyright: Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
