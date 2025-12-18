@@ -361,4 +361,4 @@ No design updates required - implementations were incorrect, designs are correct
 
 ---
 
-**Copyright:** Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.

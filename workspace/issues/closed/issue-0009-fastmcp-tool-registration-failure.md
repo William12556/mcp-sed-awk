@@ -279,4 +279,4 @@ This is a critical architectural defect blocking all system functionality. The c
 
 ---
 
-**Copyright:** Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.

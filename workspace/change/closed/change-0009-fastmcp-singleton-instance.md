@@ -358,4 +358,4 @@ Critical fix required before any MCP functionality available. Change is minimal 
 
 ---
 
-**Copyright:** Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
