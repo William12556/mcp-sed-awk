@@ -488,4 +488,4 @@ def test_execution_failure_logging(caplog):
 
 ---
 
-Copyright: Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.

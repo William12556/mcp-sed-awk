@@ -1519,4 +1519,4 @@ See comprehensive documentation: [docs/security.md](<../../docs/security.md>)
 
 ---
 
-Copyright: Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.

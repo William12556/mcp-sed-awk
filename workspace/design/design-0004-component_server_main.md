@@ -163,4 +163,4 @@ def test_main_entry_point(monkeypatch):
 
 ---
 
-Copyright: Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.

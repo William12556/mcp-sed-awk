@@ -332,4 +332,4 @@ def test_preview_no_changes(tmp_path):
 
 ---
 
-Copyright: Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
+Copyright (c) 2025 William Watson. This work is licensed under the MIT License.
