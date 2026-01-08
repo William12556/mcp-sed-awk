@@ -6,7 +6,7 @@ authors = [{name = "William Watson"}]
 license = {text = "MIT"}
 requires-python = ">=3.9"
 dependencies = [
-    "fastmcp>=0.1.0",
+    "fastmcp>=2.0.0",
 ]
 
 [project.optional-dependencies]

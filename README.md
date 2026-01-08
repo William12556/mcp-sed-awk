@@ -20,7 +20,7 @@ This FastMCP server provides LLMs with efficient file editing and analysis throu
 
 ## Requirements
 
-- Python 3.10 or higher
+- Python 3.9 or higher
 - FastMCP 2.0+
 - System binaries: `sed`, `awk`, `diff` (standard on Linux/macOS)
 - Write permissions in target directories for sed operations
@@ -30,8 +30,10 @@ This FastMCP server provides LLMs with efficient file editing and analysis throu
 **From GitHub:**
 
 ```bash
-git clone https://github.com/username/mcp-sed-awk.git
+git clone https://github.com/William12556/mcp-sed-awk.git
 cd mcp-sed-awk
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e .
 ```
 
@@ -42,16 +44,18 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "sed-awk": {
-      "command": "mcp-sed-awk",
+    "sed-awk-mcp": {
+      "command": "/path/to/mcp-sed-awk/venv/bin/mcp-sed-awk",
       "args": [
-        "--allowed-directory", "/Users/username/Documents",
-        "--allowed-directory", "/Users/username/Projects"
+        "--allowed-directory", "/Users/your-username/Documents",
+        "--allowed-directory", "/Users/your-username/Projects"
       ]
     }
   }
 }
 ```
+
+**Note:** Replace `/path/to/mcp-sed-awk` with the actual installation path. Use the full path to the virtual environment's binary to ensure reliable execution.
 
 Restart Claude Desktop to activate the server.
 
@@ -89,7 +93,7 @@ This project represents exploration of AI-supported software development using C
 **Setup development environment:**
 
 ```bash
-git clone https://github.com/username/mcp-sed-awk.git
+git clone https://github.com/William12556/mcp-sed-awk.git
 cd mcp-sed-awk
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -109,7 +113,11 @@ pytest tests/integration/
 pytest tests/ -v
 ```
 
-**Test artifacts:** Results piped to `workspace/test/result/pytest-result.txt`
+**Test artifacts:** Per project convention, pipe test results to `workspace/test/result/pytest-result.txt` using:
+
+```bash
+pytest tests/ | tee workspace/test/result/pytest-result.txt
+```
 
 ## License
 
