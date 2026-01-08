@@ -5,6 +5,7 @@ This module provides the main FastMCP server implementation with component
 initialization, configuration parsing, and tool registration.
 """
 
+import argparse
 import logging
 import os
 import sys
@@ -41,6 +42,12 @@ binary_executor: Optional[BinaryExecutor] = None
 def parse_allowed_directories(args: List[str]) -> List[str]:
     """Parse allowed directories from command line arguments or environment.
     
+    Supports multiple input formats:
+    - Flag-based: --allowed-directory /path1 --allowed-directory /path2
+    - Positional: /path1 /path2
+    - Environment: ALLOWED_DIRECTORIES=/path1,/path2
+    - Default: Current working directory (with warning)
+    
     Args:
         args: Command line arguments (sys.argv[1:])
         
@@ -52,27 +59,71 @@ def parse_allowed_directories(args: List[str]) -> List[str]:
     """
     allowed_dirs = []
     
-    # First try command line arguments
+    # Parse command line arguments if provided
     if args:
-        allowed_dirs = args
-        logger.info("Using allowed directories from command line: %s", allowed_dirs)
+        # Create argument parser
+        parser = argparse.ArgumentParser(
+            description='MCP server for sed, awk, and diff operations',
+            add_help=False  # Prevent argparse from handling --help (conflicts with MCP)
+        )
+        
+        # Add flag-based argument (can be specified multiple times)
+        parser.add_argument(
+            '--allowed-directory',
+            action='append',
+            dest='allowed_directories',
+            metavar='DIR',
+            help='Directory to allow access to (can be specified multiple times)'
+        )
+        
+        # Add positional arguments for backward compatibility
+        parser.add_argument(
+            'directories',
+            nargs='*',
+            metavar='DIRECTORY',
+            help='Directories to allow access to (positional arguments)'
+        )
+        
+        try:
+            parsed = parser.parse_args(args)
+            
+            # Collect directories from flag-based arguments
+            if parsed.allowed_directories:
+                allowed_dirs.extend(parsed.allowed_directories)
+                logger.info(
+                    "Found %d directories from --allowed-directory flags",
+                    len(parsed.allowed_directories)
+                )
+            
+            # Collect directories from positional arguments
+            if parsed.directories:
+                allowed_dirs.extend(parsed.directories)
+                logger.info(
+                    "Found %d directories from positional arguments",
+                    len(parsed.directories)
+                )
+            
+            if allowed_dirs:
+                logger.info("Using allowed directories from command line: %s", allowed_dirs)
+                
+        except SystemExit:
+            # argparse calls sys.exit() on parse errors
+            # Re-raise as ValueError for consistent error handling
+            raise ValueError("Invalid command line arguments")
     
-    # Fall back to environment variable
-    elif 'ALLOWED_DIRECTORIES' in os.environ:
+    # Fall back to environment variable if no CLI arguments
+    if not allowed_dirs and 'ALLOWED_DIRECTORIES' in os.environ:
         env_dirs = os.environ['ALLOWED_DIRECTORIES']
         allowed_dirs = [d.strip() for d in env_dirs.split(',') if d.strip()]
         logger.info("Using allowed directories from environment: %s", allowed_dirs)
     
     # Default fallback (current working directory)
-    else:
+    if not allowed_dirs:
         allowed_dirs = [os.getcwd()]
         logger.warning(
             "No directories specified, using current directory: %s", 
             allowed_dirs
         )
-    
-    if not allowed_dirs:
-        raise ValueError("No allowed directories specified")
     
     # Validate directories exist
     for directory in allowed_dirs:
@@ -242,8 +293,10 @@ def main() -> None:
         error_msg = f"Configuration error: {e}"
         logger.error(error_msg)
         print(f"Error: {error_msg}", file=sys.stderr)
-        print("\nUsage: python -m sed_awk_mcp.server <directory1> [directory2] ...", file=sys.stderr)
-        print("   OR: ALLOWED_DIRECTORIES=dir1,dir2 python -m sed_awk_mcp.server", file=sys.stderr)
+        print("\nUsage:", file=sys.stderr)
+        print("  mcp-sed-awk --allowed-directory DIR [--allowed-directory DIR ...]", file=sys.stderr)
+        print("  mcp-sed-awk DIR [DIR ...]", file=sys.stderr)
+        print("  ALLOWED_DIRECTORIES=dir1,dir2 mcp-sed-awk", file=sys.stderr)
         sys.exit(1)
         
     except Exception as e:
